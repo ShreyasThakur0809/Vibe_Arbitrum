@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Mode Theme */
+  --background-start-rgb: 254, 240, 245; /* pink-50 */
+  --background-end-rgb: 251, 207, 232; /* pink-200 */
+  --foreground-rgb: 17, 24, 39; /* gray-900 */
+  --pink-primary: 219, 39, 119; /* pink-600 */
+  --glass-bg: 255, 255, 255;
+  --glass-border: 255, 255, 255;
+}
+
+/* The 'dark' class will be added to the <html> tag by our theme switcher */
+.dark {
+  /* Dark Mode Theme */
+  --background-start-rgb: 40, 15, 35;
+  --background-end-rgb: 23, 10, 30;
+  --foreground-rgb: 243, 244, 246; /* gray-100 */
+  --pink-primary: 244, 114, 182; /* pink-400 */
+  --glass-bg: 28, 18, 38;
+  --glass-border: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      180deg,
+      rgb(var(--background-start-rgb)) 0%,
+      rgb(var(--background-end-rgb)) 100%
+    );
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-opacity-50 backdrop-blur-xl rounded-2xl border border-opacity-20 shadow-lg transition-all duration-300;
+    background-color: rgba(var(--glass-bg), 0.5);
+    border-color: rgba(var(--glass-border), 0.2);
+  }
+}
