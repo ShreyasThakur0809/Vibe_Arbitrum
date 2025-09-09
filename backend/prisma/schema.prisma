@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  uuid              String    @unique @default(uuid())
+  walletAddress     String    @unique
+  username          String?   @unique
+  profilePictureUrl String?
+  bio               String?   @db.Text
+  isPremium         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sentMatches       Match[]   @relation("User1Matches")
+  receivedMatches   Match[]   @relation("User2Matches")
+  eventsAttending   EventParticipant[]
+
+  // NEW: Relation to the Payment model
+  payments          Payment[]
+}
+
+model Match {
+  id        Int      @id @default(autoincrement())
+  user1Id   Int
+  user2Id   Int
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user1 User @relation("User1Matches", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@unique([user1Id, user2Id])
+}
+
+model Event {
+  id              Int       @id @default(autoincrement())
+  eventName       String
+  description     String?   @db.Text
+  location        String?
+  eventDate       DateTime
+  maxParticipants Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  participants    EventParticipant[]
+}
+
+model EventParticipant {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  joinedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+// NEW: Model to store payment history for premium memberships
+model Payment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  txHash    String   @unique // The unique transaction hash from the blockchain
+  amount    Float    // The amount paid (e.g., 10.0)
+  currency  String   @default("ARB")
+  status    String   @default("completed") // "completed", "failed"
+  paidAt    DateTime // The timestamp from the blockchain event
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
